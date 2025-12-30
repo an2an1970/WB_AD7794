@@ -1,7 +1,9 @@
 # WB_AD7794
 Arduino Library for the Analog Devices AD7794 24bit ADC
 
-This is a fork of the [NHBSystems/NHB_AD7794](https://github.com/NHBSystems/NHB_AD7794) library. I have also changed to an MIT license.
+This library was created as part of a project to build an instrument for measuring the Willy Brandt factor.
+
+This is a fork of the [NHBSystems/NHB_AD7794](https://github.com/NHBSystems/NHB_AD7794) library.
 
 The goal of this fork is to allow releasing the SPI bus while the ADC is converting, so other SPI devices can be used between "start conversion" and "read result". Use `startConversion()` and `awaitConversionAndReadRaw()` for this pattern.
 

@@ -1,5 +1,6 @@
 /*
   WB_AD7794.cpp - Library for using the AD7794 ADC
+  Created as part of a project to build an instrument for measuring the Willy Brandt factor.
   Original created by Jaimy Juliano, December 28, 2010
 
   This file is part of the WB_AD7794 library.
@@ -7,6 +8,7 @@
   MIT License
 
   Copyright (C) 2010,2019  Jaimy Juliano, NHBSystems
+  Copyright (C) 2024,2025  Anton Fedorov
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
