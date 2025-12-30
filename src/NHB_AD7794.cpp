@@ -260,7 +260,8 @@ uint32_t AD7794::getConvResult()
   uint8_t inByte;
   uint32_t result = 0;
 
-  //SPI.beginTransaction(spiSettings); //We should still be in our transaction
+  SPI.beginTransaction(spiSettings);
+  digitalWrite(CS, LOW);
   SPI.transfer(AD7794_READ_DATA_REG);
 
   //Read 24 bits one byte at a time, and put in an unsigned long
@@ -273,10 +274,8 @@ uint32_t AD7794::getConvResult()
   result = result << 8;
   result = result | inByte;
 
-  //De-assert CS if not in continous conversion mode
-  if(isSnglConvMode){
-    digitalWrite(CS,HIGH);
-  }
+  digitalWrite(CS, HIGH);
+  SPI.endTransaction();
 
   return result;
 }
@@ -380,15 +379,15 @@ void AD7794::startConversion(uint8_t ch)
 
   // Start an SPI transaction and kick off the conversion.
   SPI.beginTransaction(spiSettings);
-  startConv();  // private low-level helper; asserts CS LOW and writes mode reg
+  startConv();  // private low-level helper; writes mode reg and releases CS
+  SPI.endTransaction();
 
   // Mark this conversion as pending.
   convPending = true;
   convPendingCh = ch;
 
-  // In continuous mode we keep CS asserted and do not end the SPI transaction here.
+  // In continuous mode the chip keeps converting; no need to hold the SPI bus.
   if (!isSnglConvMode) {
-    digitalWrite(CS, LOW);    // ensure CS stays asserted in continuous read mode
     contConvActive = true;
     contConvCh     = ch;
   }
@@ -405,13 +404,12 @@ uint32_t AD7794::awaitConversionAndReadRaw(uint32_t timeoutMs)
   if (!convPending) {
     // In single conversion mode, start one now on the currently active channel.
     // In continuous mode, if not active yet, start; if already active, just wait for the next sample.
-    if (isSnglConvMode || !_contConvActive) {
+    if (isSnglConvMode || !contConvActive) {
       startConversion(currentCh);
     } else {
       // Continuous mode is already active; make this call consume the next sample.
-      digitalWrite(CS, LOW);       // keep/read in continuous read sequence
       convPending   = true;       // treat "next sample" as pending
-      convPendingCh = _contConvCh;
+      convPendingCh = contConvCh;
     }
   }
 
@@ -421,11 +419,6 @@ uint32_t AD7794::awaitConversionAndReadRaw(uint32_t timeoutMs)
 
   // Read the 24-bit result.
   uint32_t adcRaw = getConvResult();
-
-  // Close the transaction for single-conversion mode.
-  if (isSnglConvMode) {
-    SPI.endTransaction();
-  }
 
   // Clear the "pending" flag; in continuous mode conversions keep running in background.
   convPending = false;
@@ -442,17 +435,21 @@ int AD7794::waitForConvReady (uint32_t timeout) {
     if(isConvReady()) {
       return 0;
     }
-  while((millis() - t) < timeout);
+  } while((millis() - t) < timeout);
   
   return -1;
 }
 
 bool AD7794::isConvReady() {
   uint8_t inByte;
+  SPI.beginTransaction(spiSettings);
+  digitalWrite(CS, LOW);
   SPI.transfer(AD7794_READ_STATUS_REG);
 
   //Read status register
   inByte = SPI.transfer(0xFF); //dummy byte
+  digitalWrite(CS, HIGH);
+  SPI.endTransaction();
   return (inByte & 0x80) == 0;
 }
 
@@ -464,9 +461,7 @@ bool AD7794::isConvReady() {
 // In continuous mode, we only (re)start if not active yet OR the active channel differs.
 uint32_t AD7794::getReadingRaw(uint8_t ch)
 {
-  bool shouldStart = false;
-
-// Start if: nothing pending AND (single-shot OR NOT(continuous-active on the same channel))
+  // Start if: nothing pending AND (single-shot OR NOT(continuous-active on the same channel))
   if (!convPending && (isSnglConvMode || !(contConvActive && contConvCh == ch))) {
     startConversion(ch);
   }
@@ -490,17 +485,14 @@ void AD7794::setActiveCh(uint8_t ch)
 // and create a higher level functions to get readings.
 void AD7794::startConv()
 {
-  //Write out the mode reg, but leave CS asserted (LOW)
-  //SPI.beginTransaction(spiSettings);
-  digitalWrite(CS,LOW);
+  //Write out the mode reg and release CS.
+  digitalWrite(CS, LOW);
   SPI.transfer(AD7794_WRITE_MODE_REG);
   // SPI.transfer(highByte(modeReg));
   // SPI.transfer(lowByte(modeReg));
 
   SPI.transfer16(modeReg);
-
-  //Don't end the transaction yet. for now this is going to have to hold on
-  //to the buss until the conversion is complete. not sure if there is a way around this
+  digitalWrite(CS, HIGH);
 }
 
 
