@@ -1,7 +1,9 @@
 # NHB_AD7794
 Arduino Library for the Analog Devices AD7794 24bit ADC
 
-This is essentially just a new fork of the [JJ_AD7794](https://github.com/jjuliano77/JJ_AD7794) library. I have also changed to an MIT license.
+This is a fork of the [NHBSystems/NHB_AD7794](https://github.com/NHBSystems/NHB_AD7794) library. I have also changed to an MIT license.
+
+The goal of this fork is to allow releasing the SPI bus while the ADC is converting, so other SPI devices can be used between "start conversion" and "read result". Use `startConversion()` and `awaitConversionAndReadRaw()` for this pattern.
 
 This library has been tested with ATMEGA328, ATMEGA32u4, SAMD21, Teensy 3.2, and Esp8266* (The Esp8266 has goofy SPI and requires a some workarounds).  
   
@@ -90,9 +92,10 @@ Example
 //Pin defines, change for your setup
 #define AD7794_CS  10  
 #define EX_EN_PIN  9  
+#define OTHER_SPI_CS  8
 
 AD7794 adc(AD7794_CS, 1000000, 2.50);
-float readings[6];
+uint32_t rawReading = 0;
 
 void setup() {
   
@@ -104,30 +107,35 @@ void setup() {
     // it to output, and write LOW to turn on the excitation
     pinMode(EX_EN_PIN, OUTPUT); 
     digitalWrite(EX_EN_PIN,LOW);  //low  = 2.5 Vex ON
+    pinMode(OTHER_SPI_CS, OUTPUT);
+    digitalWrite(OTHER_SPI_CS, HIGH);
 
     adc.begin();
   
     adc.setUpdateRate(470); //Fastest setting, no filtering
-
-    for(int i=0; i < 6; i++){
-        adc.setBipolar(i,true);    
-        adc.setGain(i, 128);    
-        adc.setEnabled(i,true);
-    }    
+    adc.setBipolar(0,false); //Simple unipolar example
+    adc.setGain(0, 1);
+    adc.setEnabled(0,true);
 }
 
 void loop() {
 
-    //Read all 6 AIN channels
-    adc.read(readings,6);  
+    //Start a conversion on channel 0 and release the SPI bus immediately.
+    adc.startConversion(0);
+
+    //Do something with another SPI device while the ADC is converting.
+    SPI.beginTransaction(SPISettings(1000000, MSBFIRST, SPI_MODE0));
+    digitalWrite(OTHER_SPI_CS, LOW);
+    SPI.transfer(0xAA);
+    digitalWrite(OTHER_SPI_CS, HIGH);
+    SPI.endTransaction();
+
+    //Now wait for the ADC and read the raw result.
+    rawReading = adc.awaitConversionAndReadRaw();
 
     //Dump voltage readings out to serial port.
-    for(int i=0; i < 6; i++){
-        Serial.print(readings[i],DEC);
-        Serial.print('\t');
-    }  
-  
-    Serial.println();
+    float volts = (rawReading * 2.5f) / (AD7794_ADC_MAX_UP * 1.0f);
+    Serial.println(volts, 6);
 
     delay(10); //wait a bit
 }
