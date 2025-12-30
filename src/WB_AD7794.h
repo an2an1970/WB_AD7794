@@ -1,8 +1,8 @@
 /*
-  NHB_AD7794.h - Library for using the AD7794 ADC
+  WB_AD7794.h - Library for using the AD7794 ADC
   Original created by Jaimy Juliano, December 28, 2010
 
-  This file is part of the NHB_AD7794 library.
+  This file is part of the WB_AD7794 library.
 
   MIT License
 
@@ -27,8 +27,8 @@
   SOFTWARE.
 */
 
-#ifndef NHB_AD7794_h
-#define NHB_AD7794_h
+#ifndef WB_AD7794_h
+#define WB_AD7794_h
 
 #include <Arduino.h>
 #include <SPI.h>

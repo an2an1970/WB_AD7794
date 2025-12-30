@@ -1,4 +1,4 @@
-# NHB_AD7794
+# WB_AD7794
 Arduino Library for the Analog Devices AD7794 24bit ADC
 
 This is a fork of the [NHBSystems/NHB_AD7794](https://github.com/NHBSystems/NHB_AD7794) library. I have also changed to an MIT license.
@@ -19,7 +19,7 @@ AD7794(uint8_t csPin, uint32_t spiFrequency, double refVoltage);
 | ------ | --------------- |
 |*csPin* | Chip Select pin |
 |*spiFrequency*|SPI bus frequency to use|
-|*refVoltage*  |Reference voltage. Currently all NHBSystems boards use a 2.5V       reference, however if you are using the raw chip, you should set this value to whatever you are using. If set to **1.17** or **AD7794_INTERNAL_REF_V** the internal 1.17 volt reference will be selected.|
+|*refVoltage*  |Reference voltage. Currently all WB boards use a 2.5V       reference, however if you are using the raw chip, you should set this value to whatever you are using. If set to **1.17** or **AD7794_INTERNAL_REF_V** the internal 1.17 volt reference will be selected.|
 
 --------------------------
 
@@ -87,7 +87,7 @@ float tempC = read(6); //Returns temperature in Celsius, may need offset corecti
 Example
 -----------
 ```c
-#include "NHB_AD7794.h"
+#include "WB_AD7794.h"
 
 //Pin defines, change for your setup
 #define AD7794_CS  10  
@@ -103,7 +103,7 @@ void setup() {
 
     while(!Serial); // Wait for serial on native USB boards
     
-    // NHB boards use a pin to control excitation voltage, set 
+    // WB boards use a pin to control excitation voltage, set 
     // it to output, and write LOW to turn on the excitation
     pinMode(EX_EN_PIN, OUTPUT); 
     digitalWrite(EX_EN_PIN,LOW);  //low  = 2.5 Vex ON

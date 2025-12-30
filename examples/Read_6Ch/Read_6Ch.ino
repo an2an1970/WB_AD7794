@@ -5,7 +5,7 @@
   in bipolar mode with a gain of 128. This would be appropriate for
   most full bridge type sensors like load cells and pressure gauges
 
-  This file is part of the NHB_AD7794 library.
+  This file is part of the WB_AD7794 library.
 
   MIT License
 
@@ -31,7 +31,7 @@
 */
 
 #include <SPI.h>
-#include "NHB_AD7794.h"
+#include "WB_AD7794.h"
 
 
 //You need to set the pins for your Feather here

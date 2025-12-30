@@ -9,7 +9,7 @@
   The readings are taken in bipolar mode with a gain of 128. This would be 
   appropriate for most full bridge type sensors like load cells and pressure gauges
 
-  This file is part of the NHB_AD7794 library.
+  This file is part of the WB_AD7794 library.
 
   MIT License
 
@@ -35,7 +35,7 @@
 */
 
 #include <Arduino.h>
-#include "NHB_AD7794.h"
+#include "WB_AD7794.h"
 
 #define AD7794_CS 10
 #define EX_EN_PIN 9
