@@ -86,7 +86,7 @@ class AD7794
   
   public:
     AD7794(uint8_t csPin, uint32_t spiFrequency, double refVoltage);
-    void begin();
+    void begin(int8_t sclk = -1, int8_t miso = -1, int8_t mosi = -1, int8_t ss = -1);
     void reset();
 
     void setBipolar(uint8_t ch, bool isBipolar);

@@ -64,18 +64,29 @@ AD7794::AD7794(uint8_t csPin, uint32_t spiFrequency, double refVoltage)
   contConvCh     = 0xFF;
 }
 
-void AD7794::begin()
+void AD7794::begin(int8_t sclk, int8_t miso, int8_t mosi, int8_t ss)
 {
   pinMode(CS, OUTPUT);
   digitalWrite(CS,HIGH); 
 
+#if defined(ESP32)
+  if ((sclk >= 0) || (miso >= 0) || (mosi >= 0) || (ss >= 0)) {
+    SPI.begin(sclk, miso, mosi, ss);
+  } else {
+    SPI.begin();
+  }
+#else
+  (void)sclk;
+  (void)miso;
+  (void)mosi;
+  (void)ss;
   SPI.begin();
+#endif
 
   reset();
   delay(2); //4 times the recomended period
 
   //Apply the defaults that were set up in the constructor
-  //Should add a begin(,,) method that lets you override the defaults
   for(uint8_t i = 0; i < AD7794_CHANNEL_COUNT-2; i++){ //<-- Channel count stuff needs to be handled better!!
     setActiveCh(i);
     
