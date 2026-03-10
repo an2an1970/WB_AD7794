@@ -66,6 +66,11 @@ AD7794::AD7794(uint8_t csPin, uint32_t spiFrequency, double refVoltage)
 
 void AD7794::begin(int8_t sclk, int8_t miso, int8_t mosi, int8_t ss)
 {
+  // If SS is provided in begin(), use it as the library chip-select pin too.
+  if (ss >= 0) {
+    CS = static_cast<uint8_t>(ss);
+  }
+
   pinMode(CS, OUTPUT);
   digitalWrite(CS,HIGH); 
 
