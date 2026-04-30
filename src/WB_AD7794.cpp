@@ -328,24 +328,28 @@ float AD7794::read(uint8_t ch)
   uint32_t adcRaw = getReadingRaw(ch);
   //Serial.print(adcRaw);
   //Serial.print(' ');
-  float result;
-
   if(ch == 6){ //Channel 6 is temperature, handle it differently due to 1.17 V internal Ref
     //return (((float)adcRaw / AD7794_ADC_MAX_BP - 1) * 1.17)*100; //Bipolar, not sure what mode for temp sensor
     return TempSensorRawToDegC(adcRaw);    
   }
 
-  //And convert to Volts, note: no error checking
-  if(!Channel[currentCh].isBipolar){
-    result = (adcRaw * Channel[currentCh].vRef) / (AD7794_ADC_MAX_UP * Channel[currentCh].gain);            //Unipolar formula
+  return rawToVolts(currentCh, adcRaw);
+}
+
+float AD7794::rawToVolts(uint8_t ch, uint32_t rawData)
+{
+  float result;
+
+  if(!Channel[ch].isBipolar){
+    result = (static_cast<float>(rawData) * Channel[ch].vRef) / (static_cast<float>(AD7794_ADC_MAX_UP) * Channel[ch].gain);            //Unipolar formula
     //Serial.print("unipolar");
   }
   else{
-    result = (((float)adcRaw / AD7794_ADC_MAX_BP - 1) * Channel[currentCh].vRef) / Channel[currentCh].gain; //Bipolar formula    
+    result = ((static_cast<float>(rawData) - AD7794_ADC_MAX_BP) * Channel[ch].vRef) / (static_cast<float>(AD7794_ADC_MAX_BP) * Channel[ch].gain); //Bipolar formula
     //Serial.print("bipolar");
   }
 
-  return result - Channel[currentCh].offset;
+  return result - Channel[ch].offset;
 }
 
 /* Convert AD7794X on-chip temp sensor readings to Deg C */

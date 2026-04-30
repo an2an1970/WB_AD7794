@@ -47,8 +47,8 @@
 #define AD7794_DEFAULT_CONF_REG   0x0010    //CH 0 - Bipolar, Gain = 1, Input buffer enabled
 #define AD7794_CHOP_DISABLE       0x0210    //Chop disable bits in mode register
   
-#define AD7794_ADC_MAX_UP     16777216
-#define AD7794_ADC_MAX_BP     8388608
+#define AD7794_ADC_MAX_UP     16777216UL
+#define AD7794_ADC_MAX_BP     8388608UL
 
 #define AD7794_INTERNAL_REF_V  1.17
 #define AD7794_REF_EXT_1          0
@@ -116,7 +116,7 @@ class AD7794
     // If a conversion is already pending, it won't be started again.
     uint32_t getReadingRaw(uint8_t ch);
 
-    //float getReadingVolts(uint8_t ch);
+    float rawToVolts(uint8_t ch, uint32_t rawData);
     float TempSensorRawToDegC(uint32_t rawData);
 
     void read(float *buf, uint8_t bufSize); //experimental

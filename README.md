@@ -68,6 +68,11 @@ uint32_t getReadingRaw(uint8_t ch);
 ```
 `getReadingRaw(chan)` Returns the raw ADC counts for the given channel 
 
+```c
+float rawToVolts(uint8_t ch, uint32_t rawData);
+```
+`rawToVolts(chan, rawData)` Converts a raw ADC code to volts using the channel's bipolar/unipolar mode, gain, reference voltage, and stored offset.
+
 ```c 
 float read(uint8_t ch);
 ```
@@ -136,7 +141,7 @@ void loop() {
     rawReading = adc.awaitConversionAndReadRaw();
 
     //Dump voltage readings out to serial port.
-    float volts = (rawReading * 2.5f) / (AD7794_ADC_MAX_UP * 1.0f);
+    float volts = adc.rawToVolts(0, rawReading);
     Serial.println(volts, 6);
 
     delay(10); //wait a bit

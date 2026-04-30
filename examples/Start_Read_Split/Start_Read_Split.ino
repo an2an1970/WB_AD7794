@@ -39,7 +39,7 @@ void loop() {
 
   // Read the conversion result when ready.
   uint32_t raw = adc.awaitConversionAndReadRaw();
-  float volts = (raw * 2.5f) / (AD7794_ADC_MAX_UP * 1.0f);
+  float volts = adc.rawToVolts(0, raw);
   Serial.println(volts, 6);
 
   delay(10);
