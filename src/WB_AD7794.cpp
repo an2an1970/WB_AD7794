@@ -129,7 +129,10 @@ void AD7794::setBipolar(uint8_t ch, bool isBipolar)
 
 void AD7794::setInputBuffer(uint8_t ch, bool isBuffered)
 {
+  setActiveCh(ch);
   Channel[currentCh].isBuffered = isBuffered;
+  buildConfReg();
+  writeConfReg();
 }
 
 void AD7794::setGain(uint8_t ch, uint8_t gain)
@@ -142,6 +145,7 @@ void AD7794::setGain(uint8_t ch, uint8_t gain)
 
 void AD7794::setEnabled(uint8_t ch, bool enabled)
 {
+  setActiveCh(ch);
   Channel[currentCh].isEnabled = enabled;
 }
 
